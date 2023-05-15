@@ -19,7 +19,7 @@ model LoadPQVoltageDependence "Load model with voltage dependent P and Q"
     Types.PerUnit U_URef(start = UStart/UNom) "Ratio between voltage and reference voltage";
 equation
   U_URef = port.U / URef;
-  port.P = PRef*max(U_URef^alpha, 0.2*port.IPu^2);
+  port.P = PRef*U_URef^alpha;
   port.Q = QRef*U_URef^ beta;
   annotation(
     Icon(coordinateSystem(grid = {0.1, 0.1})),
