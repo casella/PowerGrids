@@ -13,14 +13,19 @@ model LoadPQVoltageDependence "Load model with voltage dependent P and Q"
   parameter Types.ActivePower PRefConst = 0 "Constant active power entering the load at reference voltage";
   parameter Types.ReactivePower QRefConst = 0 "Constant reactive power entering the load at reference voltage";
   parameter Types.Voltage URef = UNom "Reference value of phase-to-phase voltage";
+  parameter Types.PerUnit VPuThr = 0.1 "Threshold of p.u. voltage for low-voltage fixed-impedance approximation";
 
   Types.ActivePower PRef(nominal = SNom) =  PRefConst "Active power at reference voltage, the default binding can be changed when instantiating";
   Types.ActivePower QRef(nominal = SNom) =  QRefConst "Reactive power at reference voltage, the default binding can be changed when instantiating";
-    Types.PerUnit U_URef(start = UStart/UNom) "Ratio between voltage and reference voltage";
+  Types.PerUnit U_URef(start = UStart/UNom) "Ratio between voltage and reference voltage";
 equation
   U_URef = port.U / URef;
-  port.P = PRef*U_URef^alpha;
-  port.Q = QRef*U_URef^ beta;
+  if port.VPu > VPuThr then
+    port.P = PRef*U_URef^alpha;
+    port.Q = QRef*U_URef^ beta;
+  else
+    port.v = port.i/CM.conj(Complex(PRef*VPuThr^alpha,QRef*VPuThr^ beta)/URef^2);
+  end if;
   annotation(
     Icon(coordinateSystem(grid = {0.1, 0.1})),
     Diagram(coordinateSystem(extent = {{-200, -100}, {200, 100}})),
